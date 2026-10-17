@@ -71,6 +71,11 @@
       <whatsthis context="@info:whatsthis">Whether to update tab titles along with the title bar.</whatsthis>
       <default>false</default>
     </entry>
+    <entry name="RestoreTabs" type="Bool">
+      <label context="@label">Restore tabs on startup</label>
+      <whatsthis context="@info:whatsthis">Whether to restore tabs, their order, and session options after Yakuake is restarted.</whatsthis>
+      <default>false</default>
+    </entry>
     <entry name="ShowSystrayIcon" type="Bool">
       <label context="@label">Show a system tray icon</label>
       <whatsthis context="@info:whatsthis">Whether to show a system tray icon.</whatsthis>

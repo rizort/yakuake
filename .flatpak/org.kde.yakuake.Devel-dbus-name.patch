@@ -1,0 +1,9 @@
+--- a/app/main.cpp
++++ b/app/main.cpp
+@@ -49,5 +49,6 @@ int main(int argc, char *argv[])
+ 
+     KAboutData::setApplicationData(aboutData);
++    app.setApplicationName(QStringLiteral("yakuake.Devel"));
+     QCommandLineParser parser;
+ 
+     aboutData.setupCommandLine(&parser);

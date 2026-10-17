@@ -25,6 +25,15 @@ class SessionStack : public QStackedWidget
     Q_CLASSINFO("D-Bus Interface", "org.kde.yakuake")
 
 public:
+    struct PersistentState {
+        Session::SessionType type = Session::Single;
+        QString workingDirectory;
+        bool closable = true;
+        bool keyboardInputEnabled = true;
+        bool monitorActivityEnabled = false;
+        bool monitorSilenceEnabled = false;
+    };
+
     explicit SessionStack(QWidget *parent = nullptr);
     ~SessionStack() override;
 
@@ -39,6 +48,8 @@ public:
     QList<KActionCollection *> getPartActionCollections();
 
     bool wantsBlur() const;
+    PersistentState persistentState(int sessionId);
+    int addRestoredSession(const PersistentState &state);
 
 public Q_SLOTS:
     int addSessionImpl(Session::SessionType type = Session::Single);
@@ -142,6 +153,7 @@ private:
         QueryCloseTerminal,
     };
     bool queryClose(int sessionId, QueryCloseType type);
+    int addSessionImpl(Session::SessionType type, const QString &workingDir);
 
     VisualEventOverlay *m_visualEventOverlay = nullptr;
 

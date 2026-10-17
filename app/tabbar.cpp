@@ -92,6 +92,16 @@ TabBar::~TabBar()
 {
 }
 
+int TabBar::tabCount() const
+{
+    return m_tabs.count();
+}
+
+bool TabBar::tabTitleIsInteractive(int sessionId) const
+{
+    return m_tabTitlesSetInteractive.value(sessionId, false);
+}
+
 void TabBar::applySkin()
 {
     resize(width(), m_skin->tabBarBackgroundImage().height());

@@ -1,0 +1,68 @@
+{
+    "id": "org.kde.yakuake.Devel",
+    "runtime": "org.kde.Platform",
+    "runtime-version": "6.10",
+    "sdk": "org.kde.Sdk",
+    "command": "yakuake",
+    "rename-icon": "yakuake",
+    "rename-desktop-file": "org.kde.yakuake.desktop",
+    "rename-appdata-file": "org.kde.yakuake.appdata.xml",
+    "desktop-file-name-suffix": " (Development)",
+    "finish-args": [
+        "--device=dri",
+        "--share=ipc",
+        "--share=network",
+        "--socket=fallback-x11",
+        "--socket=wayland",
+        "--talk-name=org.freedesktop.Flatpak",
+        "--talk-name=org.kde.kglobalaccel",
+        "--talk-name=org.kde.KWin",
+        "--talk-name=org.kde.plasmashell",
+        "--talk-name=org.kde.StatusNotifierWatcher"
+    ],
+    "cleanup": [
+        "/share/doc",
+        "/share/qlogging-categories6"
+    ],
+    "modules": [
+        {
+            "name": "konsole",
+            "buildsystem": "cmake-ninja",
+            "config-opts": [
+                "-DINSTALL_ICONS=OFF"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://download.kde.org/stable/release-service/26.04.3/src/konsole-26.04.3.tar.xz",
+                    "sha256": "fe54d0297c24a52b2ec8ebf45bf75b22736f65301663846b8f3539044943e1ac"
+                }
+            ]
+        },
+        {
+            "name": "yakuake",
+            "buildsystem": "cmake-ninja",
+            "post-install": [
+                "mv /app/share/dbus-1/services/org.kde.yakuake.service /app/share/dbus-1/services/org.kde.yakuake.Devel.service",
+                "sed -i 's/^Name=org\\.kde\\.yakuake$/Name=org.kde.yakuake.Devel/' /app/share/dbus-1/services/org.kde.yakuake.Devel.service"
+            ],
+            "sources": [
+                {
+                    "type": "dir",
+                    "path": "..",
+                    "skip": [
+                        ".git",
+                        ".flatpak-builder",
+                        "build",
+                        "build-flatpak",
+                        "flatpak-repo"
+                    ]
+                },
+                {
+                    "type": "patch",
+                    "path": "org.kde.yakuake.Devel-dbus-name.patch"
+                }
+            ]
+        }
+    ]
+}

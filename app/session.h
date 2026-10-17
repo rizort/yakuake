@@ -57,6 +57,11 @@ public:
     {
         return m_terminals.size();
     }
+    SessionType type() const
+    {
+        return m_type;
+    }
+    QString workingDirectory() const;
     bool hasTerminal(int terminalId);
     Terminal *getTerminal(int terminalId);
 
@@ -136,6 +141,7 @@ private:
     int split(Terminal *terminal, Qt::Orientation orientation);
 
     QString m_workingDir;
+    SessionType m_type;
     static int m_availableSessionId;
     int m_sessionId;
 

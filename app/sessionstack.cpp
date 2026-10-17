@@ -39,6 +39,11 @@ int SessionStack::addSessionImpl(Session::SessionType type)
     Terminal *currentTerminal = currentSession ? currentSession->getTerminal(currentSession->activeTerminalId()) : nullptr;
     QString workingDir = currentTerminal ? currentTerminal->currentWorkingDirectory() : QString();
 
+    return addSessionImpl(type, workingDir);
+}
+
+int SessionStack::addSessionImpl(Session::SessionType type, const QString &workingDir)
+{
     Session *session = new Session(workingDir, type, this);
     // clang-format off
     connect(session, SIGNAL(titleChanged(int,QString)), this, SIGNAL(titleChanged(int,QString)));
@@ -63,6 +68,31 @@ int SessionStack::addSessionImpl(Session::SessionType type)
         Q_EMIT sessionAdded(session->id(), QString());
 
     return session->id();
+}
+
+SessionStack::PersistentState SessionStack::persistentState(int sessionId)
+{
+    Session *session = m_sessions.value(sessionId, nullptr);
+    if (!session)
+        return {};
+
+    return {session->type(),
+            session->workingDirectory(),
+            session->closable(),
+            session->keyboardInputEnabled(),
+            session->monitorActivityEnabled(),
+            session->monitorSilenceEnabled()};
+}
+
+int SessionStack::addRestoredSession(const PersistentState &state)
+{
+    const int sessionId = addSessionImpl(state.type, state.workingDirectory);
+    Session *session = m_sessions.value(sessionId);
+    session->setClosable(state.closable);
+    session->setKeyboardInputEnabled(state.keyboardInputEnabled);
+    session->setMonitorActivityEnabled(state.monitorActivityEnabled);
+    session->setMonitorSilenceEnabled(state.monitorSilenceEnabled);
+    return sessionId;
 }
 
 int SessionStack::addSession()

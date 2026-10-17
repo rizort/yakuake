@@ -16,6 +16,7 @@ Session::Session(const QString &workingDir, SessionType type, QWidget *parent)
     : QObject(parent)
 {
     m_workingDir = workingDir;
+    m_type = type;
     m_sessionId = m_availableSessionId;
     m_availableSessionId++;
 
@@ -417,6 +418,12 @@ const QString Session::terminalIdList()
     }
 
     return idList.join(QLatin1Char(','));
+}
+
+QString Session::workingDirectory() const
+{
+    const auto terminal = m_terminals.find(m_activeTerminalId);
+    return terminal != m_terminals.end() ? terminal->second->currentWorkingDirectory() : m_workingDir;
 }
 
 bool Session::hasTerminal(int terminalId)
