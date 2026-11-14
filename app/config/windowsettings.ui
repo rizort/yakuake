@@ -83,6 +83,35 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="fixedTabWidthLayout">
+        <item>
+         <widget class="QCheckBox" name="kcfg_FixedTabWidthEnabled">
+          <property name="text">
+           <string comment="@option:check">Fixed tab width:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="kcfg_FixedTabWidth">
+          <property name="accessibleName">
+           <string comment="@label:spinbox">Fixed tab width</string>
+          </property>
+          <property name="suffix">
+           <string comment="@label:spinbox"> px</string>
+          </property>
+          <property name="minimum"><number>48</number></property>
+          <property name="maximum"><number>600</number></property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="fixedTabWidthSpacer">
+          <property name="orientation"><enum>Qt::Horizontal</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
       <item row="1" column="0">
        <spacer>
         <property name="orientation">
@@ -409,6 +438,8 @@
   <tabstop>kcfg_ShowTabBar</tabstop>
   <tabstop>kcfg_DynamicTabTitles</tabstop>
   <tabstop>kcfg_RestoreTabs</tabstop>
+  <tabstop>kcfg_FixedTabWidthEnabled</tabstop>
+  <tabstop>kcfg_FixedTabWidth</tabstop>
   <tabstop>widthSlider</tabstop>
   <tabstop>kcfg_Width</tabstop>
   <tabstop>heightSlider</tabstop>

@@ -14,6 +14,8 @@ WindowSettings::WindowSettings(QWidget *parent)
     : QWidget(parent)
 {
     setupUi(this);
+    connect(kcfg_FixedTabWidthEnabled, &QCheckBox::toggled, kcfg_FixedTabWidth, &QSpinBox::setEnabled);
+    kcfg_FixedTabWidth->setEnabled(kcfg_FixedTabWidthEnabled->isChecked());
 
     for (int i = 2; i <= QGuiApplication::screens().count(); i++)
         kcfg_Screen->insertItem(i, xi18nc("@item:inlistbox", "Screen %1", i));

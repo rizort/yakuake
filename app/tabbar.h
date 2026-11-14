@@ -69,6 +69,7 @@ Q_SIGNALS:
     void tabTitleEdited(int sessionId, QString title);
 
 protected:
+    bool event(QEvent *event) override;
     void resizeEvent(QResizeEvent *) override;
     void paintEvent(QPaintEvent *) override;
     void wheelEvent(QWheelEvent *) override;

@@ -18,11 +18,13 @@
 #include <QApplication>
 #include <QDBusConnection>
 #include <QFontDatabase>
+#include <QHelpEvent>
 #include <QLineEdit>
 #include <QMenu>
 #include <QPainter>
 #include <QPushButton>
 #include <QToolButton>
+#include <QToolTip>
 #include <QWhatsThis>
 #include <QWheelEvent>
 
@@ -442,6 +444,12 @@ void TabBar::paintEvent(QPaintEvent *)
 
 int TabBar::drawTab(int x, int y, int index, QPainter &painter)
 {
+    const int tabStart = x;
+    const bool fixedWidth = Settings::fixedTabWidthEnabled();
+    if (fixedWidth) {
+        painter.save();
+        painter.setClipRect(QRect(tabStart, y, Settings::fixedTabWidth(), height() - y), Qt::IntersectClip);
+    }
     QString title;
     int sessionId;
     bool selected;
@@ -472,6 +480,21 @@ int TabBar::drawTab(int x, int y, int index, QPainter &painter)
 
     QFontMetrics fontMetrics(font);
     textWidth = fontMetrics.horizontalAdvance(title) + 10;
+
+    if (fixedWidth) {
+        int rightWidth = 0;
+        if (selected)
+            rightWidth = m_skin->tabBarSelectedRightCornerImage().width();
+        else if (!m_skin->tabBarUnselectedRightCornerImage().isNull())
+            rightWidth = m_skin->tabBarUnselectedRightCornerImage().width();
+        else if (index != m_tabs.indexOf(m_selectedSessionId) - 1)
+            rightWidth = m_skin->tabBarSeparatorImage().width();
+
+        const int lockWidth = !m_mainWindow->sessionStack()->isSessionClosable(sessionId)
+            ? m_skin->tabBarPreventClosingImagePosition().x() + m_skin->tabBarPreventClosingImage().width() : 0;
+        textWidth = qMax(0, Settings::fixedTabWidth() - (x - tabStart) - rightWidth - lockWidth);
+        title = fontMetrics.elidedText(title, Qt::ElideRight, qMax(0, textWidth - 10));
+    }
 
     // Draw the Prevent Closing image in the tab button.
     if (m_mainWindow->sessionStack()->isSessionClosable(sessionId) == false) {
@@ -516,7 +539,31 @@ int TabBar::drawTab(int x, int y, int index, QPainter &painter)
         x += m_skin->tabBarSeparatorImage().width();
     }
 
+    if (fixedWidth) {
+        painter.restore();
+        return tabStart + Settings::fixedTabWidth();
+    }
     return x;
+}
+
+bool TabBar::event(QEvent *event)
+{
+    if (event->type() == QEvent::ToolTip && Settings::fixedTabWidthEnabled()) {
+        auto *helpEvent = static_cast<QHelpEvent *>(event);
+        const int index = tabAt(helpEvent->pos().x());
+        if (index >= 0 && helpEvent->pos().x() < m_closeTabButton->x() && helpEvent->pos().y() >= m_skin->tabBarPosition().y()) {
+            const int left = index ? m_tabWidths.at(index - 1) : m_skin->tabBarPosition().x();
+            const int right = qMin(m_tabWidths.at(index), m_closeTabButton->x());
+            const QRect tabRect(left, m_skin->tabBarPosition().y(), right - left, height() - m_skin->tabBarPosition().y());
+            const QString title = m_tabTitles.value(m_tabs.at(index)).toHtmlEscaped();
+            QToolTip::showText(helpEvent->globalPos(), QStringLiteral("<qt>%1</qt>").arg(title), this, tabRect);
+            return true;
+        }
+        QToolTip::hideText();
+        event->ignore();
+        return true;
+    }
+    return QWidget::event(event);
 }
 
 int TabBar::tabAt(int x)

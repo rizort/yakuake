@@ -71,6 +71,17 @@
       <whatsthis context="@info:whatsthis">Whether to update tab titles along with the title bar.</whatsthis>
       <default>false</default>
     </entry>
+    <entry name="FixedTabWidthEnabled" type="Bool">
+      <label context="@label">Use a fixed tab width</label>
+      <default>false</default>
+    </entry>
+    <entry name="FixedTabWidth" type="Int">
+      <label context="@label">Tab width</label>
+      <whatsthis context="@info:whatsthis">Width of each tab in device-independent pixels.</whatsthis>
+      <default>160</default>
+      <min>48</min>
+      <max>600</max>
+    </entry>
     <entry name="RestoreTabs" type="Bool">
       <label context="@label">Restore tabs on startup</label>
       <whatsthis context="@info:whatsthis">Whether to restore tabs, their order, and session options after Yakuake is restarted.</whatsthis>
