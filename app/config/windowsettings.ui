@@ -73,6 +73,16 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="kcfg_RestoreTabs">
+        <property name="whatsThis">
+         <string comment="@info:whatsthis">Restore tabs, their order, and session options after Yakuake is restarted. Running commands are not restored.</string>
+        </property>
+        <property name="text">
+         <string comment="@option:check">Restore tabs on startup</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <spacer>
         <property name="orientation">
@@ -398,6 +408,7 @@
  <tabstops>
   <tabstop>kcfg_ShowTabBar</tabstop>
   <tabstop>kcfg_DynamicTabTitles</tabstop>
+  <tabstop>kcfg_RestoreTabs</tabstop>
   <tabstop>widthSlider</tabstop>
   <tabstop>kcfg_Width</tabstop>
   <tabstop>heightSlider</tabstop>

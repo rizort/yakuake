@@ -35,6 +35,8 @@ public:
     ~TabBar() override;
 
     void applySkin();
+    int tabCount() const;
+    bool tabTitleIsInteractive(int sessionId) const;
 
 public Q_SLOTS:
     void addTab(int sessionId, const QString &title);

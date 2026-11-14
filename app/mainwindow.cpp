@@ -10,6 +10,7 @@
 #include "config/appearancesettings.h"
 #include "config/windowsettings.h"
 #include "firstrundialog.h"
+#include "sessionrestore.h"
 #include "sessionstack.h"
 #include "settings.h"
 #include "skin.h"
@@ -128,7 +129,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     applySettings();
 
-    m_sessionStack->addSession();
+    if (!Settings::restoreTabs() || !SessionRestore::restore(m_sessionStack, m_tabBar))
+        m_sessionStack->addSession();
 
     if (Settings::firstRun()) {
         QMetaObject::invokeMethod(this, "toggleWindowState", Qt::QueuedConnection);
@@ -1193,6 +1195,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     KMainWindow::closeEvent(event);
     if (event->isAccepted()) {
+        SessionRestore::save(m_sessionStack, m_tabBar, Settings::restoreTabs());
         QApplication::quit();
     }
 }

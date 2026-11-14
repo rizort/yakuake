@@ -32,7 +32,7 @@ public:
         Left,
     };
 
-    explicit Session(const QString &workingDir, SessionType type = Single, QWidget *parent = nullptr);
+    explicit Session(const QString &workingDir, SessionType type = Single, QWidget *parent = nullptr, bool restoreDirectory = false);
     ~Session() override;
 
     int id() const
@@ -57,6 +57,11 @@ public:
     {
         return m_terminals.size();
     }
+    SessionType type() const
+    {
+        return m_type;
+    }
+    QString workingDirectory() const;
     bool hasTerminal(int terminalId);
     Terminal *getTerminal(int terminalId);
 
@@ -136,6 +141,8 @@ private:
     int split(Terminal *terminal, Qt::Orientation orientation);
 
     QString m_workingDir;
+    bool m_restoreDirectory = false;
+    SessionType m_type;
     static int m_availableSessionId;
     int m_sessionId;
 

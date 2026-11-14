@@ -16,6 +16,8 @@ target_sources(yakuake PRIVATE
     mainwindow.h
     session.cpp
     session.h
+    sessionrestore.cpp
+    sessionrestore.h
     sessionstack.cpp
     sessionstack.h
     skin.cpp
