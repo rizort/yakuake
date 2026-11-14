@@ -25,7 +25,7 @@
 
 int Terminal::m_availableTerminalId = 0;
 
-Terminal::Terminal(const QString &workingDir, QWidget *parent)
+Terminal::Terminal(const QString &workingDir, QWidget *parent, bool restoreDirectory)
     : QObject(nullptr)
 {
     m_terminalId = m_availableTerminalId;
@@ -81,7 +81,7 @@ Terminal::Terminal(const QString &workingDir, QWidget *parent)
     }
 
     bool startInWorkingDir = m_terminalInterface->profileProperty(QStringLiteral("StartInCurrentSessionDir")).toBool();
-    if (startInWorkingDir && !workingDir.isEmpty()) {
+    if ((restoreDirectory || startInWorkingDir) && !workingDir.isEmpty()) {
         m_terminalInterface->showShellInDir(workingDir);
     }
 

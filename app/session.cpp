@@ -12,10 +12,12 @@
 
 int Session::m_availableSessionId = 0;
 
-Session::Session(const QString &workingDir, SessionType type, QWidget *parent)
+Session::Session(const QString &workingDir, SessionType type, QWidget *parent, bool restoreDirectory)
     : QObject(parent)
 {
     m_workingDir = workingDir;
+    m_restoreDirectory = restoreDirectory;
+    m_type = type;
     m_sessionId = m_availableSessionId;
     m_availableSessionId++;
 
@@ -27,6 +29,7 @@ Session::Session(const QString &workingDir, SessionType type, QWidget *parent)
     connect(m_baseSplitter, SIGNAL(destroyed()), this, SLOT(prepareShutdown()));
 
     setupSession(type);
+    m_restoreDirectory = false;
 }
 
 Session::~Session()
@@ -141,7 +144,7 @@ Terminal *Session::addTerminal(QSplitter *parent, QString workingDir)
         workingDir = m_workingDir;
     }
 
-    std::unique_ptr<Terminal> terminal = std::make_unique<Terminal>(workingDir, parent);
+    std::unique_ptr<Terminal> terminal = std::make_unique<Terminal>(workingDir, parent, m_restoreDirectory);
     connect(terminal.get(), SIGNAL(activated(int)), this, SLOT(setActiveTerminal(int)));
     connect(terminal.get(), SIGNAL(manuallyActivated(Terminal *)), this, SIGNAL(terminalManuallyActivated(Terminal *)));
     connect(terminal.get(), SIGNAL(titleChanged(int, QString)), this, SLOT(setTitle(int, QString)));
@@ -417,6 +420,12 @@ const QString Session::terminalIdList()
     }
 
     return idList.join(QLatin1Char(','));
+}
+
+QString Session::workingDirectory() const
+{
+    const auto terminal = m_terminals.find(m_activeTerminalId);
+    return terminal != m_terminals.end() ? terminal->second->currentWorkingDirectory() : m_workingDir;
 }
 
 bool Session::hasTerminal(int terminalId)
