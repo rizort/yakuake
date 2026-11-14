@@ -1,0 +1,10 @@
+--- a/app/main.cpp
++++ b/app/main.cpp
+@@ -58,5 +58,7 @@ int main(int argc, char *argv[])
+     app.setWindowIcon(QIcon::fromTheme(QStringLiteral("yakuake")));
+ 
++    app.setApplicationName(QStringLiteral("yakuake.Devel"));
+     KDBusService service(KDBusService::Unique);
++    app.setApplicationName(QStringLiteral("yakuake"));
+ 
+     KCrash::initialize();

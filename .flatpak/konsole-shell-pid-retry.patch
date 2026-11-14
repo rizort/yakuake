@@ -1,0 +1,77 @@
+--- a/src/Pty.cpp
++++ b/src/Pty.cpp
+@@ -11,6 +11,7 @@
+ 
+ // Qt
+ #include <QStringList>
++#include <QThread>
+ #include <qplatformdefs.h>
+ 
+ #ifndef Q_OS_WIN
+@@ -27,27 +28,29 @@
+ 
+ using Konsole::Pty;
+ 
+-static int getShellProcessId(QLatin1String tty)
++static int getShellProcessId(const QString &sessionId)
+ {
+-    if (!KSandbox::isFlatpak()) {
+-        qFatal("Shouldn't be called in non flatpak world");
+-    }
+-    QProcess proc;
+-    proc.setProgram(QStringLiteral("ps"));
+-    proc.setArguments({QStringLiteral("-o"), QStringLiteral("pid"), QStringLiteral("-t"), QStringLiteral("%1").arg(tty), QStringLiteral("--no-headers")});
+-    KSandbox::startHostProcess(proc, QProcess::ReadOnly);
+-    if (proc.waitForStarted() && proc.waitForFinished()) {
+-        proc.setReadChannel(QProcess::StandardOutput);
+-        char buffer[256];
+-        int readCount = proc.readLine(buffer, sizeof(buffer));
+-        auto line = readCount > 0 ? QByteArrayView(buffer, readCount).trimmed() : QByteArrayView();
+-        bool ok;
+-        auto pid = line.toInt(&ok);
+-        if (ok) {
+-            return pid;
++    // PTY numbers belong to separate devpts mounts and may not be visible
++    // on the host. Match the unique session ID passed to the host shell.
++    const QString script = QStringLiteral(
++        "ps -u \"$(id -u)\" -o pid=,sid= | while read -r pid sid; do "
++        "if [ \"$pid\" = \"$sid\" ] && grep -zFxq -- \"SHELL_SESSION_ID=$1\" /proc/\"$pid\"/environ 2>/dev/null; "
++        "then printf '%s\\n' \"$pid\"; exit 0; fi; done");
++    for (int attempt = 0; attempt < 50; ++attempt) {
++        QProcess proc;
++        proc.setProgram(QStringLiteral("sh"));
++        proc.setArguments({QStringLiteral("-c"), script, QStringLiteral("sh"), sessionId});
++        KSandbox::startHostProcess(proc, QProcess::ReadOnly);
++        if (proc.waitForStarted() && proc.waitForFinished()) {
++            bool ok = false;
++            const int pid = proc.readAllStandardOutput().trimmed().toInt(&ok);
++            if (ok && pid > 0) {
++                return pid;
++            }
+         }
++        QThread::msleep(20);
+     }
+-    qWarning("Unable to get shell process id");
++    qWarning("Unable to identify host shell process");
+     return 0;
+ }
+ 
+@@ -298,7 +301,17 @@
+ 
+     if (waitForStarted()) {
+         if (KSandbox::isFlatpak()) {
+-            _shellProcessId = getShellProcessId(QLatin1String(pty()->ttyName()));
++            const QString prefix = QStringLiteral("SHELL_SESSION_ID=");
++            QString sessionId;
++            for (const QString &entry : environmentList) {
++                if (entry.startsWith(prefix)) {
++                    sessionId = entry.mid(prefix.size());
++                    break;
++                }
++            }
++            if (!sessionId.isEmpty()) {
++                _shellProcessId = getShellProcessId(sessionId);
++            }
+         }
+         return 0;
+     } else {

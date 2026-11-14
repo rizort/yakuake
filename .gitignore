@@ -13,7 +13,6 @@
 .*.swp
 .swp.*
 Doxyfile
-Makefile
 avail
 random_seed
 /build*/
@@ -26,3 +25,6 @@ CMakeLists.txt.user*
 .idea
 /cmake-build*
 .cache
+/build-flatpak/
+/flatpak-repo/
+/.flatpak-builder/
