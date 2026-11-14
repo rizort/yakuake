@@ -1,0 +1,52 @@
+--- a/src/ProcessInfo.cpp
++++ b/src/ProcessInfo.cpp
+@@ -794,13 +794,14 @@
+     FlatpakProcessInfo(int pid, QByteArrayView tty)
+         : ProcessInfo(pid)
+     {
++        Q_UNUSED(tty)
+         QProcess proc;
+         proc.setProgram(QStringLiteral("ps"));
+         proc.setArguments({
+             QStringLiteral("-o"),
+-            QStringLiteral("%U\t%p\t%c"),
+-            QStringLiteral("--tty"),
+-            QString::fromLatin1(tty.data()),
++            QStringLiteral("user=,pid=,comm="),
++            QStringLiteral("--pid"),
++            QString::number(pid),
+             QStringLiteral("--no-headers"),
+         });
+ 
+@@ -811,12 +812,11 @@
+ 
+         const QString out = QString::fromUtf8(proc.readAllStandardOutput());
+         for (QStringView line : QStringTokenizer(out, u'\n', Qt::SkipEmptyParts)) {
+-            using Container = QVarLengthArray<QStringView, 4>;
+-            const Container tokens = QStringTokenizer(line, u'\t', Qt::SkipEmptyParts).toContainer<Container>();
+-            if (tokens[1].toInt() == pid) {
+-                setUserName(tokens[0].trimmed().toString());
+-                setPid(tokens[1].trimmed().toInt());
+-                setName(tokens[2].trimmed().toString());
++            const QStringList tokens = line.toString().simplified().split(QLatin1Char(' '));
++            if (tokens.size() >= 3 && tokens[1].toInt() == pid) {
++                setUserName(tokens[0]);
++                setPid(pid);
++                setName(tokens.mid(2).join(QLatin1Char(' ')));
+             }
+         }
+     }
+--- a/src/session/Session.cpp
++++ b/src/session/Session.cpp
+@@ -301,8 +301,9 @@
+         return _reportedWorkingUrl.path();
+     }
+ 
+-    // only returned cached value
+-    if (_currentWorkingDir.isEmpty()) {
++    // Flatpak shells run on the host and may change directory without a
++    // local working-directory notification. Refresh the cached value.
++    if (KSandbox::isFlatpak() || _currentWorkingDir.isEmpty()) {
+         updateWorkingDirectory();
+     }
+ 
